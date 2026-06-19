@@ -73,6 +73,59 @@ final class ReleaseBuildTest extends Tempered_VLR_Test_Case {
 		self::assertSame( 'true', trim( $result['output'] ) );
 	}
 
+	public function test_treats_missing_previous_plugin_file_as_initial_release(): void {
+		$current_file  = $this->temp_dir . '/current.php';
+		$previous_file = $this->temp_dir . '/missing-previous.php';
+
+		file_put_contents(
+			$current_file,
+			"<?php\n/**\n * Version: 1.2.3\n */\n"
+		);
+
+		$result = $this->run_release_script( array( 'version-changed', $current_file, $previous_file ) );
+
+		self::assertSame( 0, $result['exit_code'], $result['output'] );
+		self::assertSame( 'true', trim( $result['output'] ) );
+	}
+
+	public function test_requests_release_when_version_is_unchanged_but_release_is_missing(): void {
+		$current_file  = $this->temp_dir . '/current.php';
+		$previous_file = $this->temp_dir . '/previous.php';
+
+		file_put_contents(
+			$current_file,
+			"<?php\n/**\n * Version: 1.2.3\n */\n"
+		);
+		file_put_contents(
+			$previous_file,
+			"<?php\n/**\n * Version: 1.2.3\n */\n"
+		);
+
+		$result = $this->run_release_script( array( 'release-needed', $current_file, $previous_file, 'false' ) );
+
+		self::assertSame( 0, $result['exit_code'], $result['output'] );
+		self::assertSame( 'true', trim( $result['output'] ) );
+	}
+
+	public function test_skips_release_when_version_is_unchanged_and_release_exists(): void {
+		$current_file  = $this->temp_dir . '/current.php';
+		$previous_file = $this->temp_dir . '/previous.php';
+
+		file_put_contents(
+			$current_file,
+			"<?php\n/**\n * Version: 1.2.3\n */\n"
+		);
+		file_put_contents(
+			$previous_file,
+			"<?php\n/**\n * Version: 1.2.3\n */\n"
+		);
+
+		$result = $this->run_release_script( array( 'release-needed', $current_file, $previous_file, 'true' ) );
+
+		self::assertSame( 0, $result['exit_code'], $result['output'] );
+		self::assertSame( 'false', trim( $result['output'] ) );
+	}
+
 	public function test_extracts_matching_changelog_release_notes(): void {
 		$changelog_file = $this->temp_dir . '/CHANGELOG.md';
 
