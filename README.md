@@ -22,7 +22,7 @@ But you can't have 11.5p when dealing with GBP; we round to the nearest pence.
 
 So now you have either 11p or 12p. If you are scratching your head and thinking, surely you round up and it can only be 12p. We agree, as does HMRC (His Majesty's Revenue and Customs), but WooCommerce rounds down.
 
-So in your accounting software 69p will be 57p gross and 12p tax, in WooCommerce by default it is 59p gross and 11p tax!
+So in your accounting software 69p will be 57p gross and 12p tax, in WooCommerce by default it is 58p gross and 11p tax!
 
 Now you might think, surely we can just round up, and you would be right, WooCommerce has a constant you can flip to round up. Except now your 69p item costs your customer 70p.
 
