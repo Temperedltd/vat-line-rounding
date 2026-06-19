@@ -240,6 +240,16 @@ function esc_html( string $text ): string {
 	return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
 }
 
+function esc_html__( string $text, string $domain = 'default' ): string {
+	$GLOBALS['tempered_vlr_test_translations'][] = compact( 'text', 'domain' );
+
+	return esc_html( $text );
+}
+
+function current_user_can( string $capability ): bool {
+	return ! empty( $GLOBALS['tempered_vlr_test_user_caps'][ $capability ] );
+}
+
 function add_action( string $hook_name, mixed $callback, int $priority = 10, int $accepted_args = 1 ): void {
 	$GLOBALS['tempered_vlr_test_actions'][] = compact( 'hook_name', 'callback', 'priority', 'accepted_args' );
 }
@@ -252,6 +262,8 @@ function tempered_vlr_reset_test_environment(): void {
 	$GLOBALS['tempered_vlr_test_actions']            = array();
 	$GLOBALS['tempered_vlr_test_filters']            = array();
 	$GLOBALS['tempered_vlr_test_prices_include_tax'] = true;
+	$GLOBALS['tempered_vlr_test_translations']       = array();
+	$GLOBALS['tempered_vlr_test_user_caps']          = array( 'manage_woocommerce' => true );
 	$GLOBALS['tempered_vlr_test_woocommerce']        = new Tempered_VLR_Test_WooCommerce();
 
 	WC_Tax::$compound_rates = array();

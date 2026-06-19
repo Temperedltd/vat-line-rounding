@@ -72,6 +72,34 @@ final class CartNormalizationTest extends Tempered_VLR_Test_Case {
 			'unchanged',
 			Tempered_Vat_Line_Rounding::format_cart_item_subtotal( 'unchanged', array(), 'cart-line' )
 		);
+
+		$zero_line = array(
+			'line_subtotal'     => 0.69,
+			'line_subtotal_tax' => 0.0,
+			'line_tax_data'     => array(
+				'subtotal' => array(),
+			),
+		);
+
+		self::assertSame(
+			'filtered zero-rated subtotal',
+			Tempered_Vat_Line_Rounding::format_cart_item_subtotal( 'filtered zero-rated subtotal', $zero_line, 'cart-line' )
+		);
+
+		$compound_line = array(
+			'line_subtotal'     => 0.575,
+			'line_subtotal_tax' => 0.115,
+			'line_tax_data'     => array(
+				'subtotal' => array( 55 => 0.115 ),
+			),
+		);
+
+		WC_Tax::$compound_rates[55] = true;
+
+		self::assertSame(
+			'filtered compound subtotal',
+			Tempered_Vat_Line_Rounding::format_cart_item_subtotal( 'filtered compound subtotal', $compound_line, 'cart-line' )
+		);
 	}
 
 	public function test_zero_rated_multiple_rate_extreme_and_compound_lines_are_unchanged(): void {
