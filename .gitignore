@@ -1,0 +1,19 @@
+# Agent workspace files.
+AGENTS.md
+task_plan.md
+findings.md
+progress.md
+.planning/
+.agents/
+.codex/
+
+# Local dependencies and test cache.
+vendor/
+composer.lock
+.phpunit.cache/
+
+# Local security review artifacts.
+.codex-security/
+codex-security-scans*/
+security-scans/
+*.sarif
