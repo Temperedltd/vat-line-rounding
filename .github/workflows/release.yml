@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build plugin ZIP and create release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check plugin version change
+        id: version
+        shell: bash
+        run: |
+          current_version="$(bash scripts/release-build.sh plugin-version vat-line-rounding.php)"
+          previous_file="$(mktemp)"
+          before_sha="${{ github.event.before }}"
+          changed="false"
+
+          if [[ ! "$before_sha" =~ ^0+$ ]] && git cat-file -e "$before_sha:vat-line-rounding.php"; then
+            git show "$before_sha:vat-line-rounding.php" > "$previous_file"
+            changed="$(bash scripts/release-build.sh version-changed vat-line-rounding.php "$previous_file")"
+          fi
+
+          echo "version=$current_version" >> "$GITHUB_OUTPUT"
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+
+      - name: Skip unchanged version
+        if: steps.version.outputs.changed != 'true'
+        run: echo "Plugin version did not change; release skipped."
+
+      - name: Extract release notes
+        if: steps.version.outputs.changed == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          bash scripts/release-build.sh release-notes CHANGELOG.md "$RELEASE_VERSION" > "$RUNNER_TEMP/release-notes.md"
+
+      - name: Build production ZIP
+        if: steps.version.outputs.changed == 'true'
+        id: build
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/release"
+          zip_path="$(bash scripts/release-build.sh build-zip "$GITHUB_WORKSPACE" "$RUNNER_TEMP/release" "$RELEASE_VERSION")"
+          echo "zip_path=$zip_path" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        if: steps.version.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          ZIP_PATH: ${{ steps.build.outputs.zip_path }}
+        shell: bash
+        run: |
+          gh release create "$RELEASE_VERSION" \
+            "$ZIP_PATH" \
+            --title "$RELEASE_VERSION" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"
