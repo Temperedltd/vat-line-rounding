@@ -113,14 +113,14 @@ final class Tempered_Vat_Line_Rounding {
 			return $product_subtotal;
 		}
 
-		$line_subtotal     = (float) $cart_item['line_subtotal'];
-		$line_subtotal_tax = isset( $cart_item['line_subtotal_tax'] ) && is_numeric( $cart_item['line_subtotal_tax'] )
-			? (float) $cart_item['line_subtotal_tax']
-			: 0.0;
+		$subtotal = self::normalize_amount_pair( $cart_item, 'line_subtotal', 'line_tax_data', 'subtotal' );
+		if ( null === $subtotal ) {
+			return $product_subtotal;
+		}
 
-		$amount    = self::cart_displays_prices_including_tax() ? $line_subtotal + $line_subtotal_tax : $line_subtotal;
+		$amount    = self::cart_displays_prices_including_tax() ? $subtotal['gross'] : $subtotal['net'];
 		$formatted = self::format_price( $amount );
-		$tax_label = self::cart_item_tax_label( $line_subtotal_tax );
+		$tax_label = self::cart_item_tax_label( $subtotal['tax'] );
 
 		if ( '' !== $tax_label ) {
 			$formatted .= ' <small class="tax_label">' . esc_html( $tax_label ) . '</small>';
@@ -262,9 +262,7 @@ final class Tempered_Vat_Line_Rounding {
 			return;
 		}
 
-		$message = 'VAT Line Rounding expects WooCommerce subtotal tax rounding and WC_TAX_ROUNDING_MODE set to PHP_ROUND_HALF_UP.';
-
-		echo '<div class="notice notice-warning"><p>' . esc_html( $message ) . '</p></div>';
+		echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html__( 'VAT Line Rounding expects WooCommerce subtotal tax rounding and WC_TAX_ROUNDING_MODE set to PHP_ROUND_HALF_UP.', 'vat-line-rounding' ) . '</p></div>';
 	}
 
 	/**
