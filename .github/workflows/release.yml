@@ -24,14 +24,14 @@ jobs:
         shell: bash
         run: |
           current_version="$(bash scripts/release-build.sh plugin-version vat-line-rounding.php)"
-          previous_file="$(mktemp)"
+          previous_file="$RUNNER_TEMP/previous-vat-line-rounding.php"
           before_sha="${{ github.event.before }}"
-          changed="false"
 
-          if [[ ! "$before_sha" =~ ^0+$ ]] && git cat-file -e "$before_sha:vat-line-rounding.php"; then
+          if [[ ! "$before_sha" =~ ^0+$ ]] && git cat-file -e "$before_sha:vat-line-rounding.php" 2>/dev/null; then
             git show "$before_sha:vat-line-rounding.php" > "$previous_file"
-            changed="$(bash scripts/release-build.sh version-changed vat-line-rounding.php "$previous_file")"
           fi
+
+          changed="$(bash scripts/release-build.sh version-changed vat-line-rounding.php "$previous_file")"
 
           echo "version=$current_version" >> "$GITHUB_OUTPUT"
           echo "changed=$changed" >> "$GITHUB_OUTPUT"

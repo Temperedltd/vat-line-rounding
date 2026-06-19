@@ -37,7 +37,7 @@ version_changed() {
 	local previous_version
 
 	if [[ ! -f "$previous_file" ]]; then
-		printf 'false\n'
+		printf 'true\n'
 		return 0
 	fi
 
