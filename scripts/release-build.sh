@@ -52,6 +52,27 @@ version_changed() {
 	printf 'true\n'
 }
 
+release_needed() {
+	local current_file="$1"
+	local previous_file="$2"
+	local release_exists="$3"
+	local changed
+
+	if [[ "$release_exists" != "true" && "$release_exists" != "false" ]]; then
+		echo "Release existence must be true or false." >&2
+		return 1
+	fi
+
+	changed="$(version_changed "$current_file" "$previous_file")"
+
+	if [[ "$changed" == "true" || "$release_exists" == "false" ]]; then
+		printf 'true\n'
+		return 0
+	fi
+
+	printf 'false\n'
+}
+
 release_notes() {
 	local changelog_file="$1"
 	local version="$2"
@@ -158,6 +179,7 @@ usage() {
 Usage:
   release-build.sh plugin-version <plugin-file>
   release-build.sh version-changed <current-plugin-file> <previous-plugin-file>
+  release-build.sh release-needed <current-plugin-file> <previous-plugin-file> <release-exists>
   release-build.sh release-notes <changelog-file> <version>
   release-build.sh build-zip <source-dir> <output-dir> <version>
 EOF
@@ -180,6 +202,13 @@ main() {
 				return 64
 			}
 			version_changed "$2" "$3"
+			;;
+		release-needed)
+			[[ $# -eq 4 ]] || {
+				usage >&2
+				return 64
+			}
+			release_needed "$2" "$3" "$4"
 			;;
 		release-notes)
 			[[ $# -eq 3 ]] || {
