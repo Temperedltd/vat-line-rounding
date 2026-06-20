@@ -10,6 +10,12 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 
 - Nothing yet.
 
+## [1.0.1] - 2026-06-20
+
+### Added
+
+- Added GPLv2 licence metadata and included the licence file in release artefacts.
+
 ## [1.0.0] - 2026-06-19
 
 ### Added
