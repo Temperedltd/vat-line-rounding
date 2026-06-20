@@ -170,6 +170,7 @@ final class ReleaseBuildTest extends Tempered_VLR_Test_Case {
 		file_put_contents( $source_dir . '/README.md', "# Readme\n" );
 		file_put_contents( $source_dir . '/SECURITY.md', "# Security\n" );
 		file_put_contents( $source_dir . '/CHANGELOG.md', "# Changelog\n" );
+		file_put_contents( $source_dir . '/LICENSE', "GPLv2\n" );
 		file_put_contents( $source_dir . '/composer.json', "{}\n" );
 		file_put_contents( $source_dir . '/tests/ReleaseBuildTest.php', "<?php\n" );
 		file_put_contents( $source_dir . '/vendor/package/autoload.php', "<?php\n" );
@@ -186,6 +187,7 @@ final class ReleaseBuildTest extends Tempered_VLR_Test_Case {
 		self::assertSame(
 			array(
 				'vat-line-rounding/CHANGELOG.md',
+				'vat-line-rounding/LICENSE',
 				'vat-line-rounding/README.md',
 				'vat-line-rounding/SECURITY.md',
 				'vat-line-rounding/includes/class-fixture.php',

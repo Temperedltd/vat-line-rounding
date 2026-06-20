@@ -156,6 +156,7 @@ build_zip() {
 
 	copy_required_file "$source_dir" "$package_dir" 'vat-line-rounding.php'
 	copy_required_file "$source_dir" "$package_dir" 'README.md'
+	copy_required_file "$source_dir" "$package_dir" 'LICENSE'
 	copy_required_file "$source_dir" "$package_dir" 'SECURITY.md'
 	copy_required_file "$source_dir" "$package_dir" 'CHANGELOG.md'
 

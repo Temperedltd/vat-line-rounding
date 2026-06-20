@@ -1,6 +1,6 @@
 # VAT Line Rounding
 
-Version: 1.0.0
+Version: 1.0.1
 
 VAT Line Rounding keeps WooCommerce tax-inclusive line items aligned with gross-first accounting typical of most accounting software. It recalculates eligible line net and VAT values from the rounded gross value, then writes the normalised values back to cart and order line items.
 
@@ -127,7 +127,7 @@ Releases are driven by the plugin header version in `vat-line-rounding.php`. Whe
 2. Add a matching release section to `CHANGELOG.md`.
 3. Push the version change to `main`.
 
-The GitHub Actions release workflow builds a production ZIP artefact containing the plugin file, `includes/`, `README.md`, `SECURITY.md`, and `CHANGELOG.md`.
+The GitHub Actions release workflow builds a production ZIP artefact containing the plugin file, `includes/`, `README.md`, `LICENSE`, `SECURITY.md`, and `CHANGELOG.md`.
 
 ## Security
 
