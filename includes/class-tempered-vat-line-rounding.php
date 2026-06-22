@@ -319,7 +319,11 @@ final class Tempered_Vat_Line_Rounding {
 
 		if ( self::prices_include_tax() ) {
 			$gross     = $net + $tax_info['amount'];
-			$allocated = Tempered_Vat_Line_Allocator::allocate_inclusive_line( $gross, $rate );
+			$quantity  = self::positive_integer_quantity( $line['quantity'] ?? null );
+			$allocated = null === $quantity ? null : Tempered_Vat_Line_Allocator::allocate_inclusive_quantity_line( $gross, $rate, $quantity );
+			if ( null === $allocated ) {
+				$allocated = Tempered_Vat_Line_Allocator::allocate_inclusive_line( $gross, $rate );
+			}
 		} else {
 			$allocated = Tempered_Vat_Line_Allocator::allocate_exclusive_line( $net, $rate );
 		}
@@ -359,6 +363,22 @@ final class Tempered_Vat_Line_Rounding {
 			'tax_id' => $tax_id,
 			'amount' => (float) $line[ $tax_container_key ][ $tax_data_key ][ $tax_id ],
 		);
+	}
+
+	/**
+	 * Return an exact positive integer quantity when available.
+	 *
+	 * @param mixed $quantity Line item quantity.
+	 * @return int|null Positive integer quantity, or null when unsupported.
+	 */
+	private static function positive_integer_quantity( mixed $quantity ): ?int {
+		if ( ! is_int( $quantity ) && ! ( is_string( $quantity ) && ctype_digit( $quantity ) ) ) {
+			return null;
+		}
+
+		$quantity = (int) $quantity;
+
+		return $quantity > 1 ? $quantity : null;
 	}
 
 	/**

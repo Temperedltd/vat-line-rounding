@@ -2,7 +2,7 @@
 /**
  * Plugin Name: VAT Line Rounding
  * Description: Gross-preserving VAT line rounding for WooCommerce inclusive prices.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Requires at least: 7.0
  * Requires PHP: 8.2
  * Requires Plugins: woocommerce

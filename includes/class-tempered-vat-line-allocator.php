@@ -56,6 +56,42 @@ final class Tempered_Vat_Line_Allocator {
 	}
 
 	/**
+	 * Allocate a tax-inclusive line by rounded unit value and quantity.
+	 *
+	 * @param float|int|string $gross        Tax-inclusive gross line amount.
+	 * @param float|int|string $rate_percent Tax rate percentage, for example 20.
+	 * @param int              $quantity     Line item quantity.
+	 * @param int              $decimals     Currency decimal places.
+	 * @return array<string,float>|null Allocation values, or null when unsupported.
+	 */
+	public static function allocate_inclusive_quantity_line( float|int|string $gross, float|int|string $rate_percent, int $quantity, int $decimals = 2 ): ?array {
+		if ( $quantity <= 1 ) {
+			return null;
+		}
+
+		$decimals    = (int) $decimals;
+		$scale       = 10 ** $decimals;
+		$gross_minor = self::safe_round_half_up_int( (float) $gross * $scale );
+
+		if ( null === $gross_minor || 0 !== $gross_minor % $quantity ) {
+			return null;
+		}
+
+		$unit_gross = self::minor_to_decimal( intdiv( $gross_minor, $quantity ), $scale, $decimals );
+		$allocated  = self::allocate_inclusive_line( $unit_gross, $rate_percent, $decimals );
+
+		if ( null === $allocated ) {
+			return null;
+		}
+
+		return array(
+			'gross' => round( $allocated['gross'] * $quantity, $decimals ),
+			'tax'   => round( $allocated['tax'] * $quantity, $decimals ),
+			'net'   => round( $allocated['net'] * $quantity, $decimals ),
+		);
+	}
+
+	/**
 	 * Allocate a tax-exclusive line while preserving the rounded net value.
 	 *
 	 * @param float|int|string $net          Tax-exclusive net amount.
