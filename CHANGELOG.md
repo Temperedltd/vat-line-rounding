@@ -10,6 +10,12 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 
 - Nothing yet.
 
+## [1.0.3] - 2026-06-22
+
+### Fixed
+
+- Fixed multi-quantity inclusive-price lines so a 69p item keeps the 57p net and 12p VAT unit allocation when quantity increases.
+
 ## [1.0.2] - 2026-06-22
 
 ### Added

@@ -44,6 +44,30 @@ final class CartNormalizationTest extends Tempered_VLR_Test_Case {
 		self::assertSame( array( 42 => 0.80 ), $normalized['line_tax_data']['total'], 'Exclusive total tax data should be normalised with the real tax rate.' );
 	}
 
+	public function test_cart_line_normalization_preserves_unit_vat_for_quantities(): void {
+		$normalized = Tempered_Vat_Line_Rounding::normalize_cart_line_array(
+			array(
+				'quantity'          => 10,
+				'line_subtotal'     => 5.75,
+				'line_subtotal_tax' => 1.15,
+				'line_total'        => 5.75,
+				'line_tax'          => 1.15,
+				'line_tax_data'     => array(
+					'subtotal' => array( 42 => 1.15 ),
+					'total'    => array( 42 => 1.15 ),
+				),
+			)
+		);
+
+		self::assertMoneySame( 5.70, $normalized['line_subtotal'], 'Quantity subtotal net should preserve the 57p unit allocation.' );
+		self::assertMoneySame( 1.20, $normalized['line_subtotal_tax'], 'Quantity subtotal VAT should preserve the 12p unit allocation.' );
+		self::assertMoneySame( 5.70, $normalized['line_total'], 'Quantity total net should preserve the 57p unit allocation.' );
+		self::assertMoneySame( 1.20, $normalized['line_tax'], 'Quantity total VAT should preserve the 12p unit allocation.' );
+		self::assertMoneySame( 6.90, $normalized['line_total'] + $normalized['line_tax'], 'Quantity line gross should preserve the original basket value.' );
+		self::assertSame( array( 42 => 1.20 ), $normalized['line_tax_data']['subtotal'], 'Quantity subtotal tax data should use the normalised VAT.' );
+		self::assertSame( array( 42 => 1.20 ), $normalized['line_tax_data']['total'], 'Quantity total tax data should use the normalised VAT.' );
+	}
+
 	public function test_cart_line_normalization_is_idempotent(): void {
 		$normalized   = Tempered_Vat_Line_Rounding::normalize_cart_line_array( self::badLine() );
 		$renormalized = Tempered_Vat_Line_Rounding::normalize_cart_line_array( $normalized );
@@ -279,7 +303,10 @@ final class CartNormalizationTest extends Tempered_VLR_Test_Case {
 				),
 			);
 
-			$allocated = Tempered_Vat_Line_Allocator::allocate_inclusive_line( $gross, $rate );
+			$allocated = Tempered_Vat_Line_Allocator::allocate_inclusive_quantity_line( $gross, $rate, $quantity );
+			if ( null === $allocated ) {
+				$allocated = Tempered_Vat_Line_Allocator::allocate_inclusive_line( $gross, $rate );
+			}
 			self::assertNotNull( $allocated, 'Large cart fixture unexpectedly failed to allocate.' );
 
 			$old_contents_total             += $net;

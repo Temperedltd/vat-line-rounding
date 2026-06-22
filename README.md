@@ -1,6 +1,6 @@
 # VAT Line Rounding
 
-Version: 1.0.2
+Version: 1.0.3
 
 VAT Line Rounding keeps WooCommerce tax-inclusive line items aligned with gross-first accounting typical of most accounting software. It recalculates eligible line net and VAT values from the rounded gross value, then writes the normalised values back to cart and order line items.
 
@@ -60,13 +60,14 @@ Also, chances are if you have custom code that touches tax, you rounded it up. T
 The plugin modifies WooCommerce so that it rounds line items up rather than down, hopefully resulting in a more consistent experience and less hair pulling for your accountant.
 
 - Preserves each eligible line item's gross value when splitting inclusive prices into net and VAT.
+- Preserves per-unit VAT allocation for eligible multi-quantity inclusive-price lines.
 - Normalises cart line totals, subtotals, and aggregate cart tax totals after WooCommerce calculates totals.
 - Preserves normalised order line values around WooCommerce tax recalculation.
 - Formats cart and checkout item-row subtotals from the normalised line data.
 
 ### For Accountants & Maths Folk
 
-VAT Line Rounding treats the rounded gross line total as the source of truth.
+VAT Line Rounding treats the rounded gross amount as the source of truth. For multi-quantity inclusive-price lines with an exact unit gross value, it allocates one rounded unit first and then multiplies that allocation by quantity.
 
 For each supported line, it calculates:
 
