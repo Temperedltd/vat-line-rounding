@@ -56,6 +56,42 @@ final class Tempered_Vat_Line_Allocator {
 	}
 
 	/**
+	 * Allocate a tax-exclusive line while preserving the rounded net value.
+	 *
+	 * @param float|int|string $net          Tax-exclusive net amount.
+	 * @param float|int|string $rate_percent Tax rate percentage, for example 20.
+	 * @param int              $decimals     Currency decimal places.
+	 * @return array<string,float>|null Allocation values, or null when unsafe.
+	 */
+	public static function allocate_exclusive_line( float|int|string $net, float|int|string $rate_percent, int $decimals = 2 ): ?array {
+		$decimals          = (int) $decimals;
+		$scale             = 10 ** $decimals;
+		$net_minor         = self::safe_round_half_up_int( (float) $net * $scale );
+		$rate_basis_points = self::safe_round_half_up_int( (float) $rate_percent * 100 );
+		$tax_minor         = 0;
+
+		if ( null === $net_minor || null === $rate_basis_points ) {
+			return null;
+		}
+
+		if ( $net_minor > 0 && $rate_basis_points > 0 ) {
+			if ( ! self::can_round_half_up_divide_values( $net_minor, $rate_basis_points, 10000 ) ) {
+				return null;
+			}
+
+			$tax_minor = self::round_half_up_divide( $net_minor * $rate_basis_points, 10000 );
+		}
+
+		$gross_minor = $net_minor + $tax_minor;
+
+		return array(
+			'gross' => self::minor_to_decimal( $gross_minor, $scale, $decimals ),
+			'tax'   => self::minor_to_decimal( $tax_minor, $scale, $decimals ),
+			'net'   => self::minor_to_decimal( $net_minor, $scale, $decimals ),
+		);
+	}
+
+	/**
 	 * Round a numeric value to the nearest integer using half-up semantics.
 	 *
 	 * @param float|int $value Numeric value to round.
@@ -91,10 +127,21 @@ final class Tempered_Vat_Line_Allocator {
 			return false;
 		}
 
-		$denominator          = 10000 + $rate_basis_points;
+		return self::can_round_half_up_divide_values( $gross_minor, $rate_basis_points, 10000 + $rate_basis_points );
+	}
+
+	/**
+	 * Determine whether half-up division can run without integer overflow.
+	 *
+	 * @param int $amount      Amount in minor units.
+	 * @param int $multiplier  Multiplication factor.
+	 * @param int $denominator Division denominator.
+	 * @return bool
+	 */
+	private static function can_round_half_up_divide_values( int $amount, int $multiplier, int $denominator ): bool {
 		$safe_numerator_limit = intdiv( PHP_INT_MAX - $denominator, 2 );
 
-		return $gross_minor <= intdiv( $safe_numerator_limit, $rate_basis_points );
+		return $amount <= intdiv( $safe_numerator_limit, $multiplier );
 	}
 
 	/**

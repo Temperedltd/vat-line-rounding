@@ -2,7 +2,7 @@
 /**
  * Plugin Name: VAT Line Rounding
  * Description: Gross-preserving VAT line rounding for WooCommerce inclusive prices.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Requires at least: 7.0
  * Requires PHP: 8.2
  * Requires Plugins: woocommerce
@@ -17,6 +17,11 @@
 declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
+
+if ( ! defined( 'WC_TAX_ROUNDING_MODE' ) ) {
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WooCommerce reads this integration constant by name.
+	define( 'WC_TAX_ROUNDING_MODE', PHP_ROUND_HALF_UP );
+}
 
 add_action(
 	'before_woocommerce_init',

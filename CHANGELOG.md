@@ -10,6 +10,16 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 
 - Nothing yet.
 
+## [1.0.2] - 2026-06-22
+
+### Added
+
+- The plugin now defines `WC_TAX_ROUNDING_MODE` as `PHP_ROUND_HALF_UP` when the constant is not already defined.
+
+### Fixed
+
+- Fixed tax-exclusive cart lines so VAT is rounded from the stored WooCommerce tax rate instead of preserving an already-rounded-up tax amount.
+
 ## [1.0.1] - 2026-06-20
 
 ### Added
