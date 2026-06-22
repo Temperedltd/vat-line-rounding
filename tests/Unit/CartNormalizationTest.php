@@ -20,6 +20,30 @@ final class CartNormalizationTest extends Tempered_VLR_Test_Case {
 		self::assertSame( array( 42 => 0.12 ), $normalized['line_tax_data']['subtotal'], 'Cart subtotal tax data should preserve the real tax rate ID.' );
 	}
 
+	public function test_cart_line_normalization_rounds_exclusive_tax_to_nearest_penny(): void {
+		$GLOBALS['tempered_vlr_test_prices_include_tax'] = false;
+		WC_Tax::$rate_percent_values[42]                 = 20.0;
+
+		$normalized = Tempered_Vat_Line_Rounding::normalize_cart_line_array(
+			array(
+				'line_subtotal'     => 4.02,
+				'line_subtotal_tax' => 0.81,
+				'line_total'        => 4.02,
+				'line_tax'          => 0.81,
+				'line_tax_data'     => array(
+					'subtotal' => array( 42 => 0.81 ),
+					'total'    => array( 42 => 0.81 ),
+				),
+			)
+		);
+
+		self::assertMoneySame( 4.02, $normalized['line_subtotal'], 'Exclusive cart subtotal net should remain the source amount.' );
+		self::assertMoneySame( 0.80, $normalized['line_subtotal_tax'], 'Exclusive cart subtotal VAT should round 80.4p down.' );
+		self::assertMoneySame( 0.80, $normalized['line_tax'], 'Exclusive cart total VAT should round 80.4p down.' );
+		self::assertSame( array( 42 => 0.80 ), $normalized['line_tax_data']['subtotal'], 'Exclusive subtotal tax data should be normalised with the real tax rate.' );
+		self::assertSame( array( 42 => 0.80 ), $normalized['line_tax_data']['total'], 'Exclusive total tax data should be normalised with the real tax rate.' );
+	}
+
 	public function test_cart_line_normalization_is_idempotent(): void {
 		$normalized   = Tempered_Vat_Line_Rounding::normalize_cart_line_array( self::badLine() );
 		$renormalized = Tempered_Vat_Line_Rounding::normalize_cart_line_array( $normalized );

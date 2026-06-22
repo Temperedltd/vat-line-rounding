@@ -1,6 +1,6 @@
 # VAT Line Rounding
 
-Version: 1.0.1
+Version: 1.0.2
 
 VAT Line Rounding keeps WooCommerce tax-inclusive line items aligned with gross-first accounting typical of most accounting software. It recalculates eligible line net and VAT values from the rounded gross value, then writes the normalised values back to cart and order line items.
 
@@ -95,7 +95,7 @@ It leaves unsupported lines unchanged, including zero-tax lines, compound-rate l
 1. Copy the plugin directory to `wp-content/plugins/vat-line-rounding`.
 2. Activate VAT Line Rounding in WordPress.
 3. Confirm WooCommerce is configured to round tax at subtotal level.
-4. Confirm `WC_TAX_ROUNDING_MODE` is `PHP_ROUND_HALF_UP`.
+4. Confirm the plugin admin notice is not shown. The plugin defines `WC_TAX_ROUNDING_MODE` as `PHP_ROUND_HALF_UP` when it is not already defined; if WooCommerce or site configuration has already defined a different value, define it in `wp-config.php` before WooCommerce loads.
 
 ## Development
 

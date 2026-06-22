@@ -312,13 +312,18 @@ final class Tempered_Vat_Line_Rounding {
 			return null;
 		}
 
-		$rate = self::infer_rate( $line, $net, $tax_info['amount'] );
+		$rate = self::infer_rate( $line, $net, $tax_info['amount'], $tax_info['tax_id'] );
 		if ( $rate <= 0 ) {
 			return null;
 		}
 
-		$gross     = $net + $tax_info['amount'];
-		$allocated = Tempered_Vat_Line_Allocator::allocate_inclusive_line( $gross, $rate );
+		if ( self::prices_include_tax() ) {
+			$gross     = $net + $tax_info['amount'];
+			$allocated = Tempered_Vat_Line_Allocator::allocate_inclusive_line( $gross, $rate );
+		} else {
+			$allocated = Tempered_Vat_Line_Allocator::allocate_exclusive_line( $net, $rate );
+		}
+
 		if ( null === $allocated ) {
 			return null;
 		}
@@ -376,11 +381,17 @@ final class Tempered_Vat_Line_Rounding {
 	 * @param array<string,mixed> $line    Line data.
 	 * @param float               $net     Net amount.
 	 * @param float               $raw_tax Raw tax amount.
+	 * @param int|string          $tax_id  WooCommerce tax rate ID.
 	 * @return float Tax rate percentage.
 	 */
-	private static function infer_rate( array $line, float $net, float $raw_tax ): float {
+	private static function infer_rate( array $line, float $net, float $raw_tax, int|string $tax_id ): float {
 		if ( isset( $line['vat_line_rounding_rate'] ) ) {
 			return (float) $line['vat_line_rounding_rate'];
+		}
+
+		$stored_rate = self::stored_tax_rate( $tax_id );
+		if ( $stored_rate > 0 ) {
+			return $stored_rate;
 		}
 
 		if ( $net <= 0 || $raw_tax <= 0 ) {
@@ -388,6 +399,29 @@ final class Tempered_Vat_Line_Rounding {
 		}
 
 		return ( $raw_tax / $net ) * 100;
+	}
+
+	/**
+	 * Look up a WooCommerce tax-rate percentage from a tax rate ID.
+	 *
+	 * @param int|string $tax_id WooCommerce tax rate ID.
+	 * @return float Tax rate percentage, or zero when unavailable.
+	 */
+	private static function stored_tax_rate( int|string $tax_id ): float {
+		if ( ! class_exists( 'WC_Tax' ) || ! is_callable( array( 'WC_Tax', 'get_rate_percent_value' ) ) ) {
+			return 0.0;
+		}
+
+		return (float) WC_Tax::get_rate_percent_value( $tax_id );
+	}
+
+	/**
+	 * Determine whether WooCommerce prices are configured inclusive of tax.
+	 *
+	 * @return bool True when prices include tax, or when WooCommerce cannot answer.
+	 */
+	private static function prices_include_tax(): bool {
+		return ! function_exists( 'wc_prices_include_tax' ) || wc_prices_include_tax();
 	}
 
 	/**

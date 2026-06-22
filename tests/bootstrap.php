@@ -19,6 +19,13 @@ if ( ! class_exists( 'WC_Tax' ) ) {
 		public static array $compound_rates = array();
 
 		/**
+		 * Tax-rate percentages keyed by tax rate ID.
+		 *
+		 * @var array<int|string,float>
+		 */
+		public static array $rate_percent_values = array();
+
+		/**
 		 * Determine whether a tax rate is compound.
 		 *
 		 * @param mixed $key_or_rate Tax rate ID.
@@ -26,6 +33,16 @@ if ( ! class_exists( 'WC_Tax' ) ) {
 		 */
 		public static function is_compound( mixed $key_or_rate ): bool {
 			return self::$compound_rates[ $key_or_rate ] ?? false;
+		}
+
+		/**
+		 * Return a tax-rate percentage.
+		 *
+		 * @param mixed $key_or_rate Tax rate ID.
+		 * @return float
+		 */
+		public static function get_rate_percent_value( mixed $key_or_rate ): float {
+			return self::$rate_percent_values[ $key_or_rate ] ?? 0.0;
 		}
 	}
 }
@@ -266,7 +283,8 @@ function tempered_vlr_reset_test_environment(): void {
 	$GLOBALS['tempered_vlr_test_user_caps']          = array( 'manage_woocommerce' => true );
 	$GLOBALS['tempered_vlr_test_woocommerce']        = new Tempered_VLR_Test_WooCommerce();
 
-	WC_Tax::$compound_rates = array();
+	WC_Tax::$compound_rates      = array();
+	WC_Tax::$rate_percent_values = array();
 
 	$reflection = new ReflectionClass( Tempered_Vat_Line_Rounding::class );
 
